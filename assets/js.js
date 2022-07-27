@@ -70,6 +70,18 @@ const apiTicketKey= "4HBX1EGPuPtpVUA1BB1BxkNAwsSNstap"
     }
     
     
+ 
+    function showEvents(json) {
+        for(var i=0; i<json.page.size; i++) {
+          $("#events").append("<p>"+json._embedded.events[i].name+"</p>");
+        }
+      }
 
+      function initMap(position, json) {
+        var mapDiv = document.getElementById('map');
+        
+        
+       
+      }
 
     getLocation();
