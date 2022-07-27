@@ -16,9 +16,6 @@ const apiTicketKey= "4HBX1EGPuPtpVUA1BB1BxkNAwsSNstap"
   		   }
   });
 
-    
-    
-    
     function getLocation() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(showPosition, showError);
@@ -51,6 +48,7 @@ const apiTicketKey= "4HBX1EGPuPtpVUA1BB1BxkNAwsSNstap"
         });
         
     }
+
 
     function showError(error) {
         switch(error.code) {
