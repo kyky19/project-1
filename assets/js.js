@@ -35,7 +35,7 @@ const apiTicketKey= "4HBX1EGPuPtpVUA1BB1BxkNAwsSNstap"
 
         $.ajax({
           type:"GET",
-          url:"https://app.ticketmaster.com/discovery/v2/events.json?apikey=5QGCEXAsJowiCI4n1uAwMlCGAcSNAEmG&latlong="+latlon,
+          url:"https://app.ticketmaster.com/discovery/v2/events.json?apikey=" + apiTicketKey + "&latlong="+latlon,
           async:true,
           dataType: "json",
           success: function(json) {
