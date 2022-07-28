@@ -4,111 +4,171 @@ const apiTicketKey= "4HBX1EGPuPtpVUA1BB1BxkNAwsSNstap"
 var inputEL = document.querySelector('#cityinput');
 var city;
 var cities;
-var submitbtn = document.querySelector("#btn");
-var eventList = [];
-var resultsDisplay = $("#results-display");
+var submitbtn = document.getElementById("btn");
 
-function getEvents(){
-  $("#results-display").empty();
-  $.ajax({
-    type: "GET",
-    url: "https://app.ticketmaster.com/discovery/v2/events.json?apikey=" + apiTicketKey + "&city=" + inputEL.value,
-    async:true,
-    dataType: "JSON",
-  }).then(function (response) {
-      for (var i =0; i < response._embedded.events.length;i++) {
-        var id = response._embedded.events[i].id;
-        var name = response._embedded.events[i].name;
-        var url =response._embedded.events[i].url;
-        var localDateStart = response._embedded.events[i].dates.start.localDate;
-        var localTimeStart = response._embedded.events[i].dates.start.localTime;
+// Weather data
+function GetInfo() {
 
-        if (response._embedded.events[i].hasOwnProperty("images")) {
-          if (response._embedded.events[i].images.length > 0){
-          for (var j=0; j<response._embedded.events[i].images.length;j++){
-          var imagereturn = response._embedded.events[i].images[j].url;
-        }
-      }
-    }
+  var newName = document.getElementById("cityinput");
+  var cityName = document.getElementById("cityName");
+  cityName.innerHTML = "--"+newName.value+"--";
 
-    eventList.push(id,name,url,localDateStart,localTimeStart,imagereturn);
+fetch('https://api.openweathermap.org/data/2.5/forecast?q='+newName.value+'&appid='+apiWeatherKey+'&units=imperial')
+.then(response => response.json())
+.then(data => {
+
+  //Getting the min and max values and weather conditions for each day
+  for(i = 0; i<5; i++){
+      document.getElementById("day" + (i+1) + "Desc").innerHTML = "Weather: " + (data.list[i].weather[0].description);
   }
-});
-return eventList;
+
+  for(i = 0; i<5; i++){
+      document.getElementById("day" + (i+1) + "Min").innerHTML = "Min: " + Number(data.list[i].main.temp_min).toFixed(1)+ "°";
+  }
+
+  for(i = 0; i<5; i++){
+      document.getElementById("day" + (i+1) + "Max").innerHTML = "Max: " + Number(data.list[i].main.temp_max).toFixed(1) + "°";
+  }
+
+  //Getting Weather Icons
+   for(i = 0; i<5; i++){
+      document.getElementById("img" + (i+1)).src = "http://openweathermap.org/img/wn/"+
+      data.list[i].weather[0].icon
+      +".png";
+  }
+
+  console.log(data)
 
 
-function showEvents() {
- if (eventList.length === 0) {return false;}
-var tableEl = $("<table>");
-tableEl.addClass("table");
-var tableElHead = $("<thead><tr><th></th><th>Event Name</th><th>Date</th>");
-tableEl.append(tableElHead);
-for (var i = 0; i<eventList.length; i++) {
-  var tablerow = $("<tr>");
-  var tablecell = $("<td>");
-  var linkTag = $("<a>");
-  linkTag.attr("id",eventList[i].id);
-  linkTag.addClass("idQueryString");
-  linkTag.attr("href","event.html?id=" + eventList[i].id);
-  localStorage.setItem(eventList[i].id);
+})
 
-  var imageTag = $("<img>");
-  imageTag.attr("src", eventList[i].imagereturn);
-  linkTag.append(imageTag);
-  tablecell.append(linkTag);
-  tablerow.append(tablecell);
-
-  var tableNCell = $("<td>");
-  var linktag1 = $("<a>");
-  linktag1.addClass("idQueryString");
-  linktag1.attr("href", "event.html?id=" + eventList[i].id);
-  tableNCell.append("<h3>" + eventList[i].name + "</h3>");
-  linktag1.append(tableNCell);
-  tablerow.append(linktag1);
-
-  var tableDCell = $("<td>");
-  tableDCell.prepend("<h3>" + eventList[i].localDateStart + "</h3>");
-  tablerow.append(tableDCell);
-  tableEl.append(tablerow);
+.catch(err => alert("Something Went Wrong: Try Checking Your Internet Coneciton"))
 }
 
-resultsDisplay.append(tableEl);
-
-}
-}
-
-function searchResults() {
-  var eventListObject = localStorage.getItem("eventList");
-  var myEventList = JSON.parse(eventListObject);
-  showEvents(myEventList);
-  return console.log(showEvents(myEventList));
+function DefaultScreen(){
+  document.getElementById("cityinput").defaultValue = "Nashville";
+  GetInfo();
 }
 
+
+//Getting and displaying the text for the upcoming five days of the week
+var d = new Date();
+var weekday = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",];
+
+//Function to get the correct integer for the index of the days array
+function CheckDay(day){
+  if(day + d.getDay() > 6){
+      return day + d.getDay() - 7;
+  }
+  else{
+      return day + d.getDay();
+  }
+}
+
+  for(i = 0; i<5; i++){
+      document.getElementById("day" + (i+1)).innerHTML = weekday[CheckDay(i)];
+  }
 
 
   function mostRecent(){
     var lastSearch = localStorage.getItem("mostRecent");
     if (lastSearch) {
       city = lastSearch;
-    getEvents();
-      } 
+      search();
+    } 
   }
 
-  mostRecent();
 
-  function recentCities () {
-    var recentCities = localStorage.getItem("cities");
-    if (recentCities) {
-     cities = recentCities;
-    } else {
-      cities = [];
+  function savetolocalStorage (){
+    localStorage.setItem("mostRecent", city);
+    cities.push(city);
+    localStorage.setItem("cities", JSON.stringify(cities));
+  }
+  function getEvents(page) {
+
+    $('#events-panel').show();
+    $('#attraction-panel').hide();
+  
+    if (page < 0) {
+      page = 0;
+      return;
+    }
+    if (page > 0) {
+      if (page > getEvents.json.page.totalPages-1) {
+        page=0;
+      }
+    }
+    
+    $.ajax({
+      type:"GET",
+      url:"https://app.ticketmaster.com/discovery/v2/events.json?apikey=" + apiTicketKey + "&size=4&page=" + page+ "&city=" + inputEL.value,
+      async:true,
+      dataType: "json",
+      success: function(json) {
+            getEvents.json = json;
+            showEvents(json);
+           },
+      error: function(xhr, status, err) {
+            console.log(err);
+           }
+    });
+  }
+
+  function showEvents(json) {
+    var items = $('#events .list-group-item');
+    items.hide();
+    var events = json._embedded.events;
+    var item = items.first();
+    for (var i=0;i<events.length;i++) {
+      item.children('.list-group-item-heading').text(events[i].name);
+      item.children('.list-group-item-text').text(events[i].dates.start.localDate);
+      try {
+        item.children('.venue').text(events[i]._embedded.venues[0].name + " in " + events[i]._embedded.venues[0].city.name);
+      } catch (err) {
+        console.log(err);
+      }
+      item.show();
+      item.off("click");
+      item.click(events[i], function(eventObject) {
+        console.log(eventObject.data);
+        try {
+          getAttraction(eventObject.data._embedded.attractions[0].id);
+        } catch (err) {
+        console.log(err);
+        }
+      });
+      item=item.next();
     }
   }
+  function getAttraction(id) {
+    $.ajax({
+      type:"GET",
+      url:"https://app.ticketmaster.com/discovery/v2/attractions/"+id+".json?apikey=" + apiTicketKey,
+      async:true,
+      dataType: "json",
+      success: function(json) {
+            showAttraction(json);
+           },
+      error: function(xhr, status, err) {
+            console.log(err);
+           }
+    });
+  }
+  
+  function showAttraction(json) {
+    $('#events-panel').hide();
+    $('#attraction-panel').show();
+    
+    $('#attraction-panel').click(function() {
+      getEvents(page);
+    });
+    
+    $('#attraction .list-group-item-heading').first().text(json.name);
+    $('#attraction img').first().attr('src',json.images[0].url);
+    $('#classification').text(json.classifications[0].segment.name + " - " + json.classifications[0].genre.name + " - " + json.classifications[0].subGenre.name);
+  }
 
- recentCities();
- 
-submitbtn.addEventListener("click", getEvents)
- 
+  submitbtn.addEventListener("click", getEvents(0));
     // function getLocation() {
     //     if (navigator.geolocation) {
     //         navigator.geolocation.getCurrentPosition(showPosition, showError);
@@ -160,4 +220,5 @@ submitbtn.addEventListener("click", getEvents)
     //     }
     // }
 
-    
+
+    // getLocation();   
