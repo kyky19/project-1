@@ -4,27 +4,94 @@ const apiTicketKey= "4HBX1EGPuPtpVUA1BB1BxkNAwsSNstap"
 var inputEL = document.querySelector('#cityinput');
 var city;
 var cities;
-// console.log for ticketmasterapi
-  // $.ajax({
-  //   type:"GET",
-  //   url:"https://app.ticketmaster.com/discovery/v2/events.json?apikey=" + apiTicketKey + "&city=" + inputEL.value,
-  //   async:true,
-  //   dataType: "json",
-  //   success: function(json) {
-  //         console.log(json);
+var submitbtn = document.querySelector("#btn");
+var eventList = [];
+var resultsDisplay = $("#results-display");
 
-  // 		   },
-  //   error: function(xhr, status, err) {
-  // 			  console.log(err);
-  // 		   }
-  // });
+function getEvents(){
+  $("#results-display").empty();
+  $.ajax({
+    type: "GET",
+    url: "https://app.ticketmaster.com/discovery/v2/events.json?apikey=" + apiTicketKey + "&city=" + inputEL.value,
+    async:true,
+    dataType: "JSON",
+  }).then(function (response) {
+      for (var i =0; i < response._embedded.events.length;i++) {
+        var id = response._embedded.events[i].id;
+        var name = response._embedded.events[i].name;
+        var url =response._embedded.events[i].url;
+        var localDateStart = response._embedded.events[i].dates.start.localDate;
+        var localTimeStart = response._embedded.events[i].dates.start.localTime;
+
+        if (response._embedded.events[i].hasOwnProperty("images")) {
+          if (response._embedded.events[i].images.length > 0){
+          for (var j=0; j<response._embedded.events[i].images.length;j++){
+          var imagereturn = response._embedded.events[i].images[j].url;
+        }
+      }
+    }
+
+    eventList.push(id,name,url,localDateStart,localTimeStart,imagereturn);
+  }
+});
+return eventList;
+
+
+function showEvents() {
+ if (eventList.length === 0) {return false;}
+var tableEl = $("<table>");
+tableEl.addClass("table");
+var tableElHead = $("<thead><tr><th></th><th>Event Name</th><th>Date</th>");
+tableEl.append(tableElHead);
+for (var i = 0; i<eventList.length; i++) {
+  var tablerow = $("<tr>");
+  var tablecell = $("<td>");
+  var linkTag = $("<a>");
+  linkTag.attr("id",eventList[i].id);
+  linkTag.addClass("idQueryString");
+  linkTag.attr("href","event.html?id=" + eventList[i].id);
+  localStorage.setItem(eventList[i].id);
+
+  var imageTag = $("<img>");
+  imageTag.attr("src", eventList[i].imagereturn);
+  linkTag.append(imageTag);
+  tablecell.append(linkTag);
+  tablerow.append(tablecell);
+
+  var tableNCell = $("<td>");
+  var linktag1 = $("<a>");
+  linktag1.addClass("idQueryString");
+  linktag1.attr("href", "event.html?id=" + eventList[i].id);
+  tableNCell.append("<h3>" + eventList[i].name + "</h3>");
+  linktag1.append(tableNCell);
+  tablerow.append(linktag1);
+
+  var tableDCell = $("<td>");
+  tableDCell.prepend("<h3>" + eventList[i].localDateStart + "</h3>");
+  tablerow.append(tableDCell);
+  tableEl.append(tablerow);
+}
+
+resultsDisplay.append(tableEl);
+
+}
+}
+
+function searchResults() {
+  var eventListObject = localStorage.getItem("eventList");
+  var myEventList = JSON.parse(eventListObject);
+  showEvents(myEventList);
+  return console.log(showEvents(myEventList));
+}
+
+
 
   function mostRecent(){
     var lastSearch = localStorage.getItem("mostRecent");
     if (lastSearch) {
       city = lastSearch;
-      search();
-    } 
+    getEvents();
+      } 
   }
 
   mostRecent();
@@ -39,45 +106,9 @@ var cities;
   }
 
  recentCities();
-
-  function cityInput () {
-    city = $("#cityinput").val ();
-    if (city && cities.includes(city) === false) {
-      savetolocalStorage();
-      return city;
-    }
-  };
-
-  $("#btn").on("click",(event) => {
-    event.preventDefault();
-    cityInput();
-    search();
-    $("#cityinput").val("");
-  });
-
-  function savetolocalStorage (){
-    localStorage.setItem("mostRecent", city);
-    cities.push(city);
-    localStorage.setItem("cities", JSON.stringify(cities));
-  }
-
-  function search () {
-    $.ajax({
-      type: "GET",
-      url: "https://app.ticketmaster.com/discovery/v2/events.json?apikey=" + apiTicketKey + "&city=" + inputEL.value,
-      async:true,
-      dataType: "json",
-      success: function (json) {
-        console.log(json);
-        var e = document.getElementById("events");
-        e.innerHTML = json.page.totalElements + " events found.";
-      },
-      error: function(xhr, status, err) {
-        console.log(err);
-     }
-    });
-  }
-
+ 
+submitbtn.addEventListener("click", getEvents)
+ 
     // function getLocation() {
     //     if (navigator.geolocation) {
     //         navigator.geolocation.getCurrentPosition(showPosition, showError);
@@ -128,20 +159,5 @@ var cities;
     //             break;
     //     }
     // }
-    
-    
- 
-    function showEvents(json) {
-        for(var i=0; i<json.page.size; i++) {
-          $("#events").append("<p>"+json._embedded.events[i].name+"</p>");
-        }
-      }
 
-      function initMap(position, json) {
-        var mapDiv = document.getElementById('map');
-        
-        
-       
-      }
-
-    // getLocation();
+    
