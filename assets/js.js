@@ -5,7 +5,6 @@ var inputEL = document.querySelector('#cityinput');
 var city;
 var cities;
 var submitbtn = document.getElementById("btn");
-
 // Weather data
 function GetInfo() {
 
@@ -68,7 +67,6 @@ function CheckDay(day){
   for(i = 0; i<5; i++){
       document.getElementById("day" + (i+1)).innerHTML = weekday[CheckDay(i)];
   }
-
 
   function mostRecent(){
     var lastSearch = localStorage.getItem("mostRecent");
