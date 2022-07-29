@@ -70,24 +70,6 @@ function CheckDay(day){
   }
 
 
-
-
-
-//console.log for ticketmasterapi
-  // $.ajax({
-  //   type:"GET",
-  //   url:"https://app.ticketmaster.com/discovery/v2/events.json?apikey=" + apiTicketKey + "&city=" + inputEL.value,
-  //   async:true,
-  //   dataType: "json",
-  //   success: function(json) {
-  //         console.log(json);
-
-  // 		   },
-  //   error: function(xhr, status, err) {
-  // 			  console.log(err);
-  // 		   }
-  // });
-
   function mostRecent(){
     var lastSearch = localStorage.getItem("mostRecent");
     if (lastSearch) {
@@ -96,54 +78,39 @@ function CheckDay(day){
     } 
   }
 
-  mostRecent();
-
-  function recentCities () {
-    var recentCities = localStorage.getItem("cities");
-    if (recentCities) {
-     cities = recentCities;
-    } else {
-      cities = [];
-    }
-  }
-
- recentCities();
-
-  function cityInput () {
-    city = $("#cityinput").val ();
-    if (city && cities.includes(city) === false) {
-      savetolocalStorage();
-      return city;
-    }
-  };
-
-  $("#btn").on("click",(event) => {
-    event.preventDefault();
-    cityInput();
-    search();
-    $("#cityinput").val("");
-  });
 
   function savetolocalStorage (){
     localStorage.setItem("mostRecent", city);
     cities.push(city);
     localStorage.setItem("cities", JSON.stringify(cities));
   }
+  function getEvents(page) {
 
-  function search () {
+    $('#events-panel').show();
+    $('#attraction-panel').hide();
+  
+    if (page < 0) {
+      page = 0;
+      return;
+    }
+    if (page > 0) {
+      if (page > getEvents.json.page.totalPages-1) {
+        page=0;
+      }
+    }
+    
     $.ajax({
-      type: "GET",
-      url: "https://app.ticketmaster.com/discovery/v2/events.json?apikey=" + apiTicketKey + "&city=" + inputEL.value,
+      type:"GET",
+      url:"https://app.ticketmaster.com/discovery/v2/events.json?apikey=" + apiTicketKey + "&size=10&page=" + page+ "&city=" + inputEL.value +  "&locale=*&startDateTime=2022-07-29T08:40:00Z&endDateTime=2022-08-01T08:40:00Z&sort=date,asc",
       async:true,
       dataType: "json",
-      success: function (json) {
-        console.log(json);
-        var e = document.getElementById("events");
-        e.innerHTML = json.page.totalElements + " events found.";
-      },
+      success: function(json) {
+            getEvents.json = json;
+            showEvents(json);
+           },
       error: function(xhr, status, err) {
-        console.log(err);
-     }
+            console.log(err);
+           }
     });
   }
 
@@ -256,20 +223,6 @@ function CheckDay(day){
     //             break;
     //     }
     // }
-    
-    
- 
-    function showEvents(json) {
-        for(var i=0; i<json.page.size; i++) {
-          $("#events").append("<p>"+json._embedded.events[i].name+"</p>");
-        }
-      }
 
-      function initMap(position, json) {
-        var mapDiv = document.getElementById('map');
-        
-        
-       
-      }
 
-    // getLocation();
+    // getLocation();   
