@@ -6,7 +6,7 @@ var city;
 var cities;
 var submitbtn = document.getElementById("btn");
 
-// Weather data
+// // Weather data
 function GetInfo() {
 
   var newName = document.getElementById("cityinput");
@@ -168,7 +168,11 @@ function CheckDay(day){
     $('#classification').text(json.classifications[0].segment.name + " - " + json.classifications[0].genre.name + " - " + json.classifications[0].subGenre.name);
   }
 
-  submitbtn.addEventListener("click", getEvents(0));
+  submitbtn.addEventListener("click", function (e){
+    e.preventDefault();
+    getEvents(0);
+    GetInfo();
+  });
     // function getLocation() {
     //     if (navigator.geolocation) {
     //         navigator.geolocation.getCurrentPosition(showPosition, showError);
