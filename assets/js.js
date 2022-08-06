@@ -101,7 +101,7 @@ function CheckDay(day){
     
     $.ajax({
       type:"GET",
-      url:"https://app.ticketmaster.com/discovery/v2/events.json?apikey=" + apiTicketKey + "&size=10&page=" + page+ "&city=" + inputEL.value +  "&locale=*&startDateTime=2022-07-29T08:40:00Z&endDateTime=2022-08-01T08:40:00Z&sort=date,asc",
+      url:"https://app.ticketmaster.com/discovery/v2/events.json?apikey=" + apiTicketKey + "&size=10&page=" + page+ "&city=" + inputEL.value +  "&sort=date,asc",
       async:true,
       dataType: "json",
       success: function(json) {
